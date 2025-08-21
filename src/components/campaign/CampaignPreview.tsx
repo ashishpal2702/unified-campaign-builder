@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Campaign } from "./CampaignBuilder";
 import { 
   Send, 
@@ -11,14 +14,24 @@ import {
   Mail, 
   Smartphone,
   Calendar,
-  Target
+  Target,
+  Save,
+  Eye
 } from "lucide-react";
+import { useState } from "react";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { toast } from "sonner";
 
 interface CampaignPreviewProps {
   campaign: Campaign;
 }
 
 export const CampaignPreview = ({ campaign }: CampaignPreviewProps) => {
+  const { createCampaign } = useCampaigns();
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+
   const getChannelIcon = (channel: string) => {
     switch (channel) {
       case "sms": return <Smartphone className="h-4 w-4" />;
@@ -42,6 +55,65 @@ export const CampaignPreview = ({ campaign }: CampaignPreviewProps) => {
     const rates = { sms: 0.05, email: 0.001, whatsapp: 0.02 };
     return total + ((rates[channel as keyof typeof rates] || 0) * campaign.contacts.length);
   }, 0);
+
+  const handleSaveDraft = async () => {
+    try {
+      const campaignData = {
+        name: campaign.name,
+        channels: campaign.channels,
+        message: campaign.message,
+        selected_contacts: campaign.contacts,
+        status: 'draft' as const,
+        user_id: null // Will be set by RLS
+      };
+
+      const result = await createCampaign(campaignData);
+      if (!result.error) {
+        toast.success("Campaign saved as draft successfully");
+      } else {
+        toast.error("Failed to save campaign: " + result.error);
+      }
+    } catch (error) {
+      toast.error("Failed to save campaign");
+    }
+  };
+
+  const handleScheduleCampaign = () => {
+    setIsScheduleDialogOpen(true);
+  };
+
+  const handleConfirmSchedule = async () => {
+    if (!scheduledDate || !scheduledTime) {
+      toast.error("Please select both date and time");
+      return;
+    }
+
+    try {
+      const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+      
+      const campaignData = {
+        name: campaign.name,
+        channels: campaign.channels,
+        message: campaign.message,
+        selected_contacts: campaign.contacts,
+        status: 'scheduled' as const,
+        scheduled_at: scheduledDateTime,
+        user_id: null // Will be set by RLS
+      };
+
+      const result = await createCampaign(campaignData);
+      if (!result.error) {
+        toast.success("Campaign scheduled successfully");
+        setIsScheduleDialogOpen(false);
+        setScheduledDate("");
+        setScheduledTime("");
+      } else {
+        toast.error("Failed to schedule campaign: " + result.error);
+      }
+    } catch (error) {
+      toast.error("Failed to schedule campaign");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -228,13 +300,15 @@ export const CampaignPreview = ({ campaign }: CampaignPreviewProps) => {
             </div>
             
             <div className="flex gap-3">
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleSaveDraft}>
+                <Save className="h-4 w-4 mr-2" />
                 Save as Draft
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleScheduleCampaign}>
+                <Calendar className="h-4 w-4 mr-2" />
                 Schedule
               </Button>
-              <Button className="bg-gradient-success hover:shadow-glow">
+              <Button className="bg-gradient-primary hover:shadow-glow">
                 <Send className="h-4 w-4 mr-2" />
                 Send Now
               </Button>
@@ -242,6 +316,51 @@ export const CampaignPreview = ({ campaign }: CampaignPreviewProps) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Schedule Dialog */}
+      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Campaign</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="scheduled-date">Date</Label>
+              <Input
+                id="scheduled-date"
+                type="date"
+                value={scheduledDate}
+                onChange={(e) => setScheduledDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div>
+              <Label htmlFor="scheduled-time">Time</Label>
+              <Input
+                id="scheduled-time"
+                type="time"
+                value={scheduledTime}
+                onChange={(e) => setScheduledTime(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setIsScheduleDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleConfirmSchedule}
+              >
+                Schedule
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

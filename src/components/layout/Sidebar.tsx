@@ -12,36 +12,22 @@ import {
   Calendar,
   Zap
 } from "lucide-react";
+import { useCampaigns } from "@/hooks/useCampaigns";
 
 interface SidebarProps {
   activeCampaign: string | null;
   onCampaignSelect: (campaignId: string) => void;
+  onAnalyticsClick: () => void;
+  onManageContactsClick: () => void;
 }
 
-export const Sidebar = ({ activeCampaign, onCampaignSelect }: SidebarProps) => {
-  const [campaigns] = useState([
-    { 
-      id: "1", 
-      name: "Holiday Sale", 
-      status: "active", 
-      channels: ["sms", "email"],
-      reach: "12.5K"
-    },
-    { 
-      id: "2", 
-      name: "Product Launch", 
-      status: "draft", 
-      channels: ["whatsapp", "email"],
-      reach: "8.2K"
-    },
-    { 
-      id: "3", 
-      name: "Customer Welcome", 
-      status: "scheduled", 
-      channels: ["sms"],
-      reach: "2.1K"
-    }
-  ]);
+export const Sidebar = ({ 
+  activeCampaign, 
+  onCampaignSelect, 
+  onAnalyticsClick, 
+  onManageContactsClick 
+}: SidebarProps) => {
+  const { campaigns, loading } = useCampaigns();
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
@@ -54,10 +40,11 @@ export const Sidebar = ({ activeCampaign, onCampaignSelect }: SidebarProps) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-brand-green";
-      case "draft": return "bg-muted";
-      case "scheduled": return "bg-brand-blue";
-      default: return "bg-muted";
+      case "active": return "bg-success text-success-foreground";
+      case "draft": return "bg-warning text-warning-foreground";
+      case "scheduled": return "bg-primary text-primary-foreground";
+      case "completed": return "bg-muted text-muted-foreground";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
@@ -77,11 +64,19 @@ export const Sidebar = ({ activeCampaign, onCampaignSelect }: SidebarProps) => {
               <Plus className="h-4 w-4 mr-2" />
               New Campaign
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={onManageContactsClick}
+            >
               <Users className="h-4 w-4 mr-2" />
               Manage Contacts
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={onAnalyticsClick}
+            >
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </Button>
@@ -97,7 +92,17 @@ export const Sidebar = ({ activeCampaign, onCampaignSelect }: SidebarProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {campaigns.map((campaign) => (
+            {loading ? (
+              <div className="text-center py-4 text-muted-foreground">
+                Loading campaigns...
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No campaigns yet</p>
+              </div>
+            ) : (
+              campaigns.map((campaign) => (
               <div
                 key={campaign.id}
                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -113,7 +118,7 @@ export const Sidebar = ({ activeCampaign, onCampaignSelect }: SidebarProps) => {
                   </h4>
                   <Badge 
                     variant="secondary" 
-                    className={`${getStatusColor(campaign.status)} text-white text-xs`}
+                    className={`${getStatusColor(campaign.status)} text-xs`}
                   >
                     {campaign.status}
                   </Badge>
@@ -135,11 +140,11 @@ export const Sidebar = ({ activeCampaign, onCampaignSelect }: SidebarProps) => {
                     ))}
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {campaign.reach} contacts
+                    {campaign.selected_contacts.length} contacts
                   </span>
                 </div>
               </div>
-            ))}
+            )))}
           </CardContent>
         </Card>
       </div>

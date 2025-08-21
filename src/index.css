@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Twilio Console-inspired SaaS Dashboard Theme */
+
+@layer base {
+  :root {
+    /* Twilio Console Colors - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 27%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
+
+    /* Twilio Red Primary */
+    --primary: 348 86% 61%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 348 86% 56%;
+
+    /* Navy Secondary */
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 348 86% 61%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 348 86% 61%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 25% 27%;
+
+    /* Channel Colors */
+    --channel-sms: 220 9% 46%;
+    --channel-email: 217 91% 60%;
+    --channel-whatsapp: 142 70% 49%;
+    --channel-rcs: 217 91% 60%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 348 86% 61%;
+
+    --radius: 0.5rem;
+
+    /* Twilio Console Specific */
+    --console-navy: 215 28% 17%;
+    --console-navy-light: 215 25% 25%;
+    --console-red: 348 86% 61%;
+    --console-gray: 220 9% 46%;
+    --console-gray-light: 220 14% 96%;
+    
+    /* Sidebar - Light Navy */
+    --sidebar-background: 215 28% 17%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 348 86% 61%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 25%;
+    --sidebar-accent-foreground: 210 40% 85%;
+    --sidebar-border: 215 25% 25%;
+    --sidebar-ring: 348 86% 61%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(348 86% 61%), hsl(348 86% 56%));
+    --gradient-navy: linear-gradient(180deg, hsl(215 28% 17%), hsl(215 25% 25%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 28% 17%) 0%, hsl(348 86% 61%) 100%);
+    
+    /* Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(348 86% 61% / 0.25);
+    --shadow-card: 0 2px 8px -2px hsl(215 25% 27% / 0.1);
+    --shadow-navy: 0 4px 20px -4px hsl(215 28% 17% / 0.15);
+    
+    /* Animations */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .dark {
+    /* Dark Navy Background */
+    --background: 215 28% 17%;
+    --foreground: 0 0% 100%;
+
+    --card: 215 25% 25%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 215 25% 25%;
+    --popover-foreground: 0 0% 100%;
+
+    /* Twilio Red Primary */
+    --primary: 348 86% 61%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 348 86% 56%;
+
+    --secondary: 215 25% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 215 25% 25%;
+    --muted-foreground: 210 40% 85%;
+
+    --accent: 348 86% 61%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 348 86% 61%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 28% 17%;
+
+    /* Channel Colors */
+    --channel-sms: 220 9% 46%;
+    --channel-email: 217 91% 60%;
+    --channel-whatsapp: 142 70% 49%;
+    --channel-rcs: 217 91% 60%;
+
+    --border: 215 25% 35%;
+    --input: 215 25% 35%;
+    --ring: 348 86% 61%;
+
+    /* Dark Sidebar - Deeper Navy */
+    --sidebar-background: 215 28% 12%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 348 86% 61%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 20%;
+    --sidebar-accent-foreground: 210 40% 85%;
+    --sidebar-border: 215 25% 20%;
+    --sidebar-ring: 348 86% 61%;
+    
+    /* Dark Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(348 86% 61%), hsl(348 86% 56%));
+    --gradient-navy: linear-gradient(180deg, hsl(215 28% 12%), hsl(215 25% 20%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 28% 12%) 0%, hsl(348 86% 61%) 100%);
+    
+    /* Dark Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(348 86% 61% / 0.4);
+    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-navy: 0 4px 20px -4px hsl(0 0% 0% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+  /* Twilio Console Button Styles */
+  .btn-twilio {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .btn-primary {
+    @apply btn-twilio bg-primary text-primary-foreground hover:opacity-90 shadow-sm;
+  }
+  
+  .btn-secondary {
+    @apply btn-twilio bg-secondary text-secondary-foreground hover:opacity-90;
+  }
+  
+  .btn-outline {
+    @apply btn-twilio border border-border bg-background hover:bg-muted;
+  }
+  
+  /* Twilio Console Card Styles */
+  .card-twilio {
+    @apply rounded-lg border bg-card text-card-foreground shadow-card p-6;
+  }
+  
+  /* Twilio Console Input Styles */
+  .input-twilio {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm;
+    @apply ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium;
+    @apply placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  /* Twilio Console Navigation */
+  .nav-twilio {
+    @apply flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors;
+    @apply hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+  }
+  
+  .nav-twilio.active {
+    @apply bg-sidebar-primary text-sidebar-primary-foreground;
+  }
+}

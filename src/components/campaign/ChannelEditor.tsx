@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Smartphone, 
   Mail, 
@@ -16,7 +17,10 @@ import {
   User,
   Building,
   Wand2,
-  Loader2
+  Loader2,
+  Upload,
+  Image as ImageIcon,
+  Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +36,10 @@ interface ChannelEditorProps {
 
 export const ChannelEditor = ({ channel, message, onMessageChange }: ChannelEditorProps) => {
   const [isImproving, setIsImproving] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
@@ -71,12 +79,66 @@ export const ChannelEditor = ({ channel, message, onMessageChange }: ChannelEdit
     onMessageChange({ ...message, subject });
   };
 
-  const addImage = () => {
-    const newImageUrl = `https://via.placeholder.com/400x300?text=${channel.toUpperCase()}+Image+${message.images.length + 1}`;
-    onMessageChange({
-      ...message,
-      images: [...message.images, newImageUrl]
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select only image files');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        onMessageChange({
+          ...message,
+          images: [...message.images, imageUrl]
+        });
+        toast.success('Image uploaded successfully');
+      };
+      reader.readAsDataURL(file);
     });
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const generateAIImage = async () => {
+    if (!imagePrompt.trim()) {
+      toast.error("Please enter a description for the image");
+      return;
+    }
+
+    setIsGeneratingImage(true);
+    
+    try {
+      // Simulate AI image generation (in real app, this would call an image generation API)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Generate a placeholder image with the prompt
+      const imageUrl = `https://via.placeholder.com/512x512/4285F4/ffffff?text=${encodeURIComponent(imagePrompt.substring(0, 20))}`;
+      
+      onMessageChange({
+        ...message,
+        images: [...message.images, imageUrl]
+      });
+      
+      toast.success("AI image generated successfully!");
+      setImagePrompt("");
+      setImageDialogOpen(false);
+    } catch (error) {
+      toast.error("Failed to generate image");
+    } finally {
+      setIsGeneratingImage(false);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -374,16 +436,85 @@ export const ChannelEditor = ({ channel, message, onMessageChange }: ChannelEdit
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label>Images</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={addImage}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Image
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUploadClick}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Upload
+                    </Button>
+                    <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200 hover:from-purple-500/20 hover:to-pink-500/20"
+                        >
+                          <Sparkles className="h-4 w-4" />
+                          AI Generate
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-purple-500" />
+                            Generate AI Image
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="image-prompt">Describe the image you want to generate</Label>
+                            <Textarea
+                              id="image-prompt"
+                              placeholder="A professional business meeting, modern office, happy customers..."
+                              value={imagePrompt}
+                              onChange={(e) => setImagePrompt(e.target.value)}
+                              className="min-h-20"
+                            />
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              onClick={() => setImageDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={generateAIImage}
+                              disabled={isGeneratingImage}
+                              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                            >
+                              {isGeneratingImage ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Generating...
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="h-4 w-4 mr-2" />
+                                  Generate
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
+                
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                />
                 
                 {message.images.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">

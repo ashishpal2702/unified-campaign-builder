@@ -309,7 +309,7 @@ ${businessName || "The Team"}`;
                             <SelectValue placeholder="Select channel to customize" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">General Version</SelectItem>
+                            <SelectItem value="general">General Version</SelectItem>
                             {channels.map(channel => (
                               <SelectItem key={channel} value={channel}>
                                 {channel.toUpperCase()} Version

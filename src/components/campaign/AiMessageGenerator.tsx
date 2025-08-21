@@ -310,11 +310,11 @@ ${businessName || "The Team"}`;
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="general">General Version</SelectItem>
-                            {channels.map(channel => (
-                              <SelectItem key={channel} value={channel}>
-                                {channel.toUpperCase()} Version
-                              </SelectItem>
-                            ))}
+                              {channels.filter(Boolean).map(channel => (
+                                <SelectItem key={channel} value={channel}>
+                                  {channel.toUpperCase()} Version
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </div>

@@ -11,12 +11,21 @@ import {
   Phone,
   Edit,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  Upload,
+  Database as DatabaseIcon,
+  MoreHorizontal
 } from "lucide-react";
 import { useContacts } from "@/hooks/useContacts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { FileUpload } from "@/components/contacts/FileUpload";
+import { DatabaseConnector } from "@/components/contacts/DatabaseConnector";
+import type { Database } from "@/integrations/supabase/types";
+
+type ContactInsert = Database['public']['Tables']['contacts']['Insert'];
 
 interface ManageContactsProps {
   onBack: () => void;
@@ -26,6 +35,8 @@ export const ManageContacts = ({ onBack }: ManageContactsProps) => {
   const { contacts, loading, createContact, updateContact, deleteContact } = useContacts();
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
+  const [isDatabaseConnectOpen, setIsDatabaseConnectOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -97,6 +108,38 @@ export const ManageContacts = ({ onBack }: ManageContactsProps) => {
     setEditingContact(null);
   };
 
+  const handleBulkImport = async (contacts: ContactInsert[]) => {
+    if (contacts.length === 0) return;
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Import contacts in batches to avoid overwhelming the API
+    const batchSize = 10;
+    for (let i = 0; i < contacts.length; i += batchSize) {
+      const batch = contacts.slice(i, i + batchSize);
+      
+      for (const contact of batch) {
+        const result = await createContact(contact);
+        if (!result.error) {
+          successCount++;
+        } else {
+          errorCount++;
+        }
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`Successfully imported ${successCount} contacts`);
+    }
+    if (errorCount > 0) {
+      toast.error(`Failed to import ${errorCount} contacts`);
+    }
+
+    setIsFileUploadOpen(false);
+    setIsDatabaseConnectOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -137,16 +180,17 @@ export const ManageContacts = ({ onBack }: ManageContactsProps) => {
           />
         </div>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
-          setIsCreateDialogOpen(open);
-          if (!open) resetForm();
-        }}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-primary hover:shadow-glow transition-all">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Contact
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+            setIsCreateDialogOpen(open);
+            if (!open) resetForm();
+          }}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-primary hover:shadow-glow transition-all">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Contact
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -195,6 +239,26 @@ export const ManageContacts = ({ onBack }: ManageContactsProps) => {
             </form>
           </DialogContent>
         </Dialog>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <MoreHorizontal className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setIsFileUploadOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload CSV/Excel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsDatabaseConnectOpen(true)}>
+              <DatabaseIcon className="h-4 w-4 mr-2" />
+              Connect Database
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       </div>
 
       {/* Contacts List */}
@@ -266,6 +330,32 @@ export const ManageContacts = ({ onBack }: ManageContactsProps) => {
           )}
         </CardContent>
       </Card>
+
+      {/* File Upload Dialog */}
+      <Dialog open={isFileUploadOpen} onOpenChange={setIsFileUploadOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Import Contacts from File</DialogTitle>
+          </DialogHeader>
+          <FileUpload
+            onContactsImported={handleBulkImport}
+            onClose={() => setIsFileUploadOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Database Connection Dialog */}
+      <Dialog open={isDatabaseConnectOpen} onOpenChange={setIsDatabaseConnectOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Connect to External Database</DialogTitle>
+          </DialogHeader>
+          <DatabaseConnector
+            onContactsImported={handleBulkImport}
+            onClose={() => setIsDatabaseConnectOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

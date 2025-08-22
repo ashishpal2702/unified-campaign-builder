@@ -48,7 +48,7 @@ export const MessageComposer = ({ message, onMessageChange, channels }: MessageC
       
       setChannelMessages(updatedMessages);
     }
-  }, [message.text, message.images, channels, onMessageChange]);
+  }, [message.text, message.images, channels]);
 
   // Update channels when the channels array changes
   useEffect(() => {

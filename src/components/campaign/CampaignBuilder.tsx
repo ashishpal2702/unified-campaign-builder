@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChannelSelector } from "./ChannelSelector";
 import { MessageComposer } from "./MessageComposer";
@@ -63,13 +64,21 @@ export const CampaignBuilder = () => {
       <Card className="shadow-card">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
                 Campaign Builder
               </CardTitle>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 mb-4">
                 Create multi-channel marketing campaigns with AI-powered content
               </p>
+              <div className="max-w-md">
+                <Input
+                  value={campaign.name}
+                  onChange={(e) => updateCampaign({ name: e.target.value })}
+                  placeholder="Enter campaign name..."
+                  className="text-lg font-medium"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Button

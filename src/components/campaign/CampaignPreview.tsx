@@ -58,22 +58,27 @@ export const CampaignPreview = ({ campaign }: CampaignPreviewProps) => {
 
   const handleSaveDraft = async () => {
     try {
+      // Generate a unique campaign name if not provided
+      const campaignName = campaign.name || `Campaign ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+      
       const campaignData = {
-        name: campaign.name,
+        name: campaignName,
         channels: campaign.channels,
         message: campaign.message,
-        selected_contacts: campaign.contacts,
+        selected_contacts: campaign.contacts, // contacts are already string IDs
         status: 'draft' as const,
-        user_id: null // Will be set by RLS
+        user_id: '00000000-0000-0000-0000-000000000000' // Temporary user ID for testing
       };
 
       const result = await createCampaign(campaignData);
       if (!result.error) {
-        toast.success("Campaign saved as draft successfully");
+        toast.success("Campaign saved as draft successfully!");
       } else {
+        console.error("Campaign save error:", result.error);
         toast.error("Failed to save campaign: " + result.error);
       }
     } catch (error) {
+      console.error("Campaign save error:", error);
       toast.error("Failed to save campaign");
     }
   };

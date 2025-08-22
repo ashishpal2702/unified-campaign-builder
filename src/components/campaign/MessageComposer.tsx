@@ -38,32 +38,11 @@ export const MessageComposer = ({ message, onMessageChange, channels }: MessageC
       const updatedMessages: Record<string, ChannelMessage> = {};
       
       channels.forEach(channel => {
-        // Generate channel-optimized content
-        let channelText = message.text;
-        let channelSubject = "";
-        
-        // Apply channel-specific formatting
-        if (channel === "sms" && message.text) {
-          // Keep SMS short and add opt-out
-          channelText = message.text.length > 140 
-            ? message.text.substring(0, 140) + "... Text STOP to opt out."
-            : message.text + " Text STOP to opt out.";
-        } else if (channel === "email" && message.text) {
-          // Add email structure
-          channelSubject = "Important Update from Your Business";
-          channelText = `Dear {FirstName},\n\n${message.text}\n\nThank you for your continued support!\n\nBest regards,\n{BrandName} Team`;
-        } else if (channel === "whatsapp" && message.text) {
-          // Add WhatsApp styling
-          channelText = `👋 Hi {FirstName}!\n\n${message.text}\n\n💬 Reply to this message for instant support!`;
-        } else if (channel === "rcs" && message.text) {
-          // Add RCS interactive elements
-          channelText = `🎉 ${message.text}\n\n[Learn More] [Contact Us]\n\nPowered by {BrandName}`;
-        }
-        
+        // Use the message as-is without automatic formatting
         updatedMessages[channel] = {
-          text: channelText,
+          text: message.text,
           images: channel === "sms" ? [] : [...message.images], // SMS doesn't support images
-          subject: channel === "email" ? channelSubject : undefined
+          subject: channel === "email" ? "" : undefined
         };
       });
       

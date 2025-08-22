@@ -47,15 +47,6 @@ export const MessageComposer = ({ message, onMessageChange, channels }: MessageC
       });
       
       setChannelMessages(updatedMessages);
-      
-      // Update the main message state with the first channel's data for backwards compatibility
-      const firstChannel = channels[0];
-      if (firstChannel && updatedMessages[firstChannel]) {
-        onMessageChange({
-          text: updatedMessages[firstChannel].text,
-          images: updatedMessages[firstChannel].images
-        });
-      }
     }
   }, [message.text, message.images, channels, onMessageChange]);
 

@@ -67,7 +67,7 @@ export const CampaignPreview = ({ campaign }: CampaignPreviewProps) => {
         message: campaign.message,
         selected_contacts: campaign.contacts, // contacts are already string IDs
         status: 'draft' as const,
-        user_id: '00000000-0000-0000-0000-000000000000' // Temporary user ID for testing
+        user_id: null // Public campaign for anon sessions (no auth)
       };
 
       const result = await createCampaign(campaignData);
